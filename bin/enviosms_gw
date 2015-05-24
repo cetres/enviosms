@@ -1,0 +1,29 @@
+#!/usr/bin/python
+
+import optparse
+import re
+
+def start(opts):
+	from enviosms.gateway import app
+	app.debug = opts.debug
+	bind_ip, bind_port = opts.bind.split(":")
+	app.run(host=bind_ip, port=bind_port)
+
+parser = optparse.OptionParser(usage="usage: %prog [options]",
+                               description="Gateway for SMS messages")
+parser.add_option("-q", "--queue", dest="queue", default="localhost:5672",
+                  help="connect to specified queue (default %default)")
+parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
+                  help="timeout in seconds to wait before exiting (default %default)")
+parser.add_option("-i", "--bind", dest="bind", default="0.0.0.0:80",
+                  help="Bind a specific IP address and port (default %default)")
+parser.add_option("-d", dest="debug", action="store_true",
+                  help="enable debugging")
+opts, args = parser.parse_args()
+
+try:
+	if not re.match(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', opts.bind):
+		parser.error("bind address is invalid (i.e. 127.0.0.1:80)")
+	start(opts)
+except KeyboardInterrupt:
+	pass

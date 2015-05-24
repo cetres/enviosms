@@ -1,4 +1,4 @@
-from sms import app
+from enviosms import app
 from flask.ext.restful import reqparse, abort, Resource, Api
 from qpid.messaging import Connection, Message
 
