@@ -40,6 +40,6 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
-    install_requires=['flask', 'qpid-python'],
+    install_requires=['flask', 'flask-restful', 'qpid-python'],
 
 )

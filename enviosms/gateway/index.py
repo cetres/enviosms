@@ -1,20 +1,43 @@
-from enviosms import app
+# -*- coding: UTF-8 -*-
+from flask import g
 from flask.ext.restful import reqparse, abort, Resource, Api
-from qpid.messaging import Connection, Message
 
-BROKER = "localhost:5672" 
-ADDRESS = "sms.sender"
+from qpid.messaging import Connection, Message
+from qpid.messaging.exceptions import ConnectError
+
+from enviosms.gateway import app, exceptions
+from enviosms.gateway.config import Config
+
+BROKER = app.config["MQ_HOST"]
+ADDRESS = app.config["MQ_ADDR"]
 MSGS = {}
+CONFIG_FILE = 'enviosms_config.py'
+
+def load_config():
+    global app, CONFIG_FILE
+    conf = Config(app)
+    conf.load_config(CONFIG_FILE)
+    return conf
+
+@app.before_request
+def before_request():
+    if not g.conf:
+        g.conf = load_config()
+    g.logger = g.conf.logger(__name__)
 
 # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
-connection = Connection(BROKER)
-connection.open()
-session = connection.session()
-sender = session.sender(address)
+try:
+    connection = Connection(BROKER)
+    connection.open()
+    session = connection.session()
+    sender = session.sender(address)
 
-parser = reqparse.RequestParser()
-parser.add_argument('msg_num', type=str)
-parser.add_argument('msg_texto', type=str)
+    parser = reqparse.RequestParser()
+    parser.add_argument('msg_num', type=str)
+    parser.add_argument('msg_texto', type=str)
+except ConnectError as e:
+    raise exceptions.MQError(2)
+
 
 def abort_if_sms_doesnt_exist(msg_id):
     if msg_id not in MSGS:
