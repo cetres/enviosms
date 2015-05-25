@@ -5,9 +5,7 @@
 import os
 import logging
 
-LOCAL_DB_PATH = "./dados"
-LOCAL_DB_NAME = "orch"
-LOCAL_LOG_PATH = "./logs/orch.log"
+LOCAL_LOG_PATH = "/var/log/enviosms"
 LOCAL_LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
 LOCAL_LOG_LEVEL = logging.INFO
 
@@ -29,6 +27,8 @@ class Config(object):
         self._config = {}
         self._app = app
         self.mq_host = app.config.get("MQ_HOST")
+        self.mq_addr = app.config.get("MQ_ADDR")
+
 
     def load_config(self, arquivo):
         arquivo = os.path.join(self._root_path, arquivo)
@@ -83,7 +83,7 @@ class Config(object):
                                      "Tentando criar %s" % log_dir)
                     os.mkdir(log_dir)
                 except OSError:
-                    raise ConfigError("Impossivel criar pasta de log")
+                    raise ConfigError("Impossivel criar pasta de log %s" % log_dir)
             self._log_handler = logging.FileHandler(log_path)
             formatter = logging.Formatter(LOCAL_LOG_FORMAT)
             self._log_handler.setFormatter(formatter)

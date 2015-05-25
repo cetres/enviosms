@@ -24,6 +24,7 @@ def before_request():
 
     # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
     try:
+        g.logger.debug("Starting MQ connection")
         connection = Connection(g.conf.mq_host)
         connection.open()
         session = connection.session()
