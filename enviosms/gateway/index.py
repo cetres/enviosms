@@ -8,8 +8,6 @@ from qpid.messaging.exceptions import ConnectError
 from enviosms.gateway import app, exceptions
 from enviosms.gateway.config import Config
 
-BROKER = app.config["MQ_HOST"]
-ADDRESS = app.config["MQ_ADDR"]
 MSGS = {}
 CONFIG_FILE = 'enviosms_config.py'
 
@@ -21,22 +19,21 @@ def load_config():
 
 @app.before_request
 def before_request():
-    if not g.conf:
-        g.conf = load_config()
+    g.conf = load_config()
     g.logger = g.conf.logger(__name__)
 
-# https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
-try:
-    connection = Connection(BROKER)
-    connection.open()
-    session = connection.session()
-    sender = session.sender(address)
+    # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
+    try:
+        connection = Connection(g.conf.mq_host)
+        connection.open()
+        session = connection.session()
+        sender = session.sender(g.conf.mq_addr)
 
-    parser = reqparse.RequestParser()
-    parser.add_argument('msg_num', type=str)
-    parser.add_argument('msg_texto', type=str)
-except ConnectError as e:
-    raise exceptions.MQError(2)
+        parser = reqparse.RequestParser()
+        parser.add_argument('msg_num', type=str)
+        parser.add_argument('msg_texto', type=str)
+    except ConnectError as e:
+        raise exceptions.MQError(2)
 
 
 def abort_if_sms_doesnt_exist(msg_id):

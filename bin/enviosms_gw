@@ -10,32 +10,32 @@ from enviosms.gateway.config import Config
 def start(opts):
 	app.debug = opts.debug
 	bind_ip, bind_port = opts.bind.split(":")
-	app.g.conf = Config(app)
-	app.g.conf.set_mq_host(opts.mq_host)
-	app.config["MQ_HOST"]=
-	app.config["MQ_ADDR"]=opts.mq_addr
-	app.config["TIMEOUT"]=opts.timeout
-	app.run(host=bind_ip, port=bind_port)
+	app.config["DEBUG"] = opts.debug
+	app.config["MQ_HOST"] = opts.mq_host
+	app.config["MQ_ADDR"] = opts.mq_addr
+	app.config["TIMEOUT"] = opts.timeout
+	app.run(host=bind_ip, port=int(bind_port))
 
-parser = optparse.OptionParser(usage="usage: %prog [options]",
-                               description="Gateway for SMS messages")
-parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
-                  help="connect to specified message queue (default %default)")
-parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
-                  help="address for message queue (default %default)")
-parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
-                  help="timeout in seconds to wait before exiting (default %default)")
-parser.add_option("-i", "--bind", dest="bind", default="0.0.0.0:80",
-                  help="Bind a specific IP address and port (default %default)")
-parser.add_option("-d", dest="debug", action="store_true",
-                  help="enable debugging")
-opts, args = parser.parse_args()
+if __name__ == '__main__':
+	parser = optparse.OptionParser(usage="usage: %prog [options]",
+								   description="Gateway for SMS messages")
+	parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
+	                  help="connect to specified message queue (default %default)")
+	parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+	                  help="address for message queue (default %default)")
+	parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
+	                  help="timeout in seconds to wait before exiting (default %default)")
+	parser.add_option("-i", "--bind", dest="bind", default="0.0.0.0:80",
+	                  help="Bind a specific IP address and port (default %default)")
+	parser.add_option("-d", dest="debug", action="store_true",
+	                  help="enable debugging")
+	opts, args = parser.parse_args()
 
-try:
-	if not re.match(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', opts.bind):
-		parser.error("bind address is invalid (i.e. 127.0.0.1:80)")
-	start(opts)
-except exceptions.MQError as e:
-	print(e)
-except KeyboardInterrupt:
-	pass
+	try:
+		if not re.match(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', opts.bind):
+			parser.error("bind address is invalid (i.e. 127.0.0.1:80)")
+		start(opts)
+	except exceptions.MQError as e:
+		print(e)
+	except KeyboardInterrupt:
+		pass

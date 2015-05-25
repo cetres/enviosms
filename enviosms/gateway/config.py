@@ -28,12 +28,38 @@ class Config(object):
         self._root_path = app.root_path
         self._config = {}
         self._app = app
+        self.mq_host = app.config.get("MQ_HOST")
 
     def load_config(self, arquivo):
         arquivo = os.path.join(self._root_path, arquivo)
-        if not os.path.exists(arquivo):
-            raise ConfigError("Arquivo nao encontrado: %s" % str(arquivo))
-        execfile(arquivo, self._config)
+        if os.path.exists(arquivo):
+            #self.logger
+            #raise ConfigError("Arquivo nao encontrado: %s" % str(arquivo))
+            execfile(arquivo, self._config)
+
+    @property
+    def mq_host(self):
+        return self._config.get("mq_host")
+
+    @mq_host.setter
+    def mq_host(self, value):
+        self._config["mq_host"] = value
+
+    @property
+    def mq_addr(self):
+        return self._config.get("mq_addr")
+
+    @mq_addr.setter
+    def mq_addr(self, value):
+        self._config["mq_addr"] = value
+
+    @property
+    def timeout(self):
+        return self._config.get("timeout")
+
+    @timeout.setter
+    def timeout(self, value):
+        self._config["timeout"] = value
 
     @property
     def local_log_file(self):
