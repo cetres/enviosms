@@ -1,4 +1,6 @@
 # -*- coding: UTF-8 -*-
+import os
+import stat
 import serial
 import time
 
@@ -12,9 +14,15 @@ class Modem:
     _stopbits = serial.STOPBITS_ONE
 
     def __init__(self, device, speed=57600, timeout=5):
+        self.verify_file(device)
         self._device = device
         self._speed = speed
         self._timeout = timeout
+
+    def verify_file(self, file_name):
+        f_mode = os.stat(file_name).st_mode
+        if not stat.S_ISCHR(f_mode):
+            raise ModemError("Device file is not valid")
 
     def connect(self):
         self._serial = serial.Serial(self._device,

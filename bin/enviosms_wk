@@ -1,0 +1,44 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
+import optparse
+import os
+import stat
+
+from enviosms.worker.modem import Modem
+from enviosms.worker.exceptions import ModemError
+
+def start(device, opts):
+	try:
+		mdm = Modem(device)
+	except ModemError as e:
+		print(e)
+	finally:
+		try:
+			mdm.disconnect()
+		except:
+			pass
+
+
+if __name__ == '__main__':
+	parser = optparse.OptionParser(usage="usage: %prog [options] <device>",
+								   description="Worker for SMS messages at specific device path")
+	parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
+	                  help="connect to specified message queue (default %default)")
+	parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+	                  help="address for message queue (default %default)")
+	parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
+	                  help="timeout in seconds to wait before exiting (default %default)")
+	parser.add_option("-d", dest="debug", action="store_true",
+	                  help="Enable debugging")
+	opts, args = parser.parse_args()
+
+	try:
+		if len(args) == 0:
+			parser.error("No device specified")
+		device = args[0]
+		start(device, opts)
+	except OSError as e:
+		print(e)
+	except KeyboardInterrupt:
+		pass
