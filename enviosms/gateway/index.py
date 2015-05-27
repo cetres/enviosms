@@ -43,11 +43,11 @@ def abort_if_sms_doesnt_exist(msg_id):
 
 class Sms(Resource):
     def get(self, msg_id):
-        abort_if_todo_doesnt_exist(msg_id)
+        abort_if_sms_doesnt_exist(msg_id)
         return MSGS[msg_id]
 
     def delete(self, msg_id):
-        abort_if_todo_doesnt_exist(msg_id)
+        abort_if_sms_doesnt_exist(msg_id)
         del MSGS[msg_id]
         return '', 204
 

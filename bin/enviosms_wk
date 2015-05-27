@@ -2,8 +2,6 @@
 # -*- coding: UTF-8 -*-
 
 import optparse
-import os
-import stat
 
 from enviosms.worker.modem import Modem
 from enviosms.worker.exceptions import ModemError

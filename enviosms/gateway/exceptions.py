@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 
 class MQError(Exception):
     _errors = {

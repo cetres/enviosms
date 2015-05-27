@@ -1,6 +1,9 @@
+# -*- coding: UTF-8 -*-
+import logging
 
+logger = logging.getLogger("enviosms")
 
-class Message:
+class Message(object):
     def __init__(self, recipient, content):
         self._recipient = recipient
         self._content = content

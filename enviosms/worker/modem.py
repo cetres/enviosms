@@ -3,6 +3,9 @@ import os
 import stat
 import serial
 import time
+import logging
+
+logger = logging.getLogger("enviosms")
 
 class Modem:
     _connected = False
@@ -25,7 +28,8 @@ class Modem:
             raise ModemError("Device file is not valid")
 
     def connect(self):
-        self._serial = serial.Serial(self._device,
+        if not self._serial:
+            self._serial = serial.Serial(self._device,
                                      self._speed,
                                      self._timeout,
                                      xonxoff = self._xonxoff,
@@ -33,41 +37,49 @@ class Modem:
                                      bytesize = self._bytesize,
                                      parity = self._parity,
                                      stopbits = self._stopbits)
-        time.sleep(1)
-        self._connected = True
+            time.sleep(1)
 
-    def readLine(self):
+    def flush(self):
+        self._serial.flushInput()
+        self._serial.flushOutput()
+
+    def read_line(self):
             data = self._serial.readline()
             print data
             return data 
 
-    def sendCommand(self, command, getline=True, newline=True, expect=None):
+    def send_command(self, command, getline=True, newline=True, expect=None):
             self._serial.write(command)
             if newline:
                 self._serial.write("\r")
             if getline or expect:
-                data = self.ReadLine()
+                data = self.read_ine()
                 if expect and data != expect:
-                        raise ModemError("Return not expected")
+                    raise ModemError("Return not expected")
                 if getLine:
                     return data
 
-    def initMessage(self):
-        if not self._connected:
-            self.connect()
-        self.sendCommand('ATZ')
-        self.sendCommand('AT+CMGF=1')
-        self._message_initialized = True
-
-    def sendMessage(self, message):
+    def init_message(self):
         if not self._message_initialized:
-            self.initMessage()
-        self.sendCommand('AT+CMGS="' + message.recipient + '"', False)
-        self.sendCommand(messasge.content, False)
+            self.connect()
+            self.send_command('ATZ')
+            self.send_command('AT+CMGF=1')
+            self._message_initialized = True
+
+    def send_message(self, message):
+        self.init_message()
+        self.send_command('AT+CMGS="' + message.recipient + '"', False)
+        self.send_command(messasge.content, False)
         self._serial.write(chr(26))
         time.sleep(1)
 
+    def read_messages(self):
+        self.connect()
+        self.flush()
+        self.send_command('AT+CMGL="REC UNREAD"', getline=True)
+        return self._serial.readall()
+
     def disconnect(self):
         self._serial.close()
-        self._connected = False
+        self._serial = None
         self._message_initialized = False
