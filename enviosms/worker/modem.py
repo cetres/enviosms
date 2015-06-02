@@ -5,6 +5,8 @@ import serial
 import time
 import logging
 
+from .exceptions import ModemError
+
 logger = logging.getLogger("enviosms")
 
 class Modem:
@@ -56,7 +58,7 @@ class Modem:
                 data = self.read_ine()
                 if expect and data != expect:
                     raise ModemError("Return not expected")
-                if getLine:
+                if getline:
                     return data
 
     def init_message(self):
@@ -69,7 +71,7 @@ class Modem:
     def send_message(self, message):
         self.init_message()
         self.send_command('AT+CMGS="' + message.recipient + '"', False)
-        self.send_command(messasge.content, False)
+        self.send_command(message.content, False)
         self._serial.write(chr(26))
         time.sleep(1)
 

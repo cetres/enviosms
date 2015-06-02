@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger("enviosms")
 
 class Sender(object):
-    def __init__(self):
+    def __init__(self, device):
         self._modem = Modem(device)
 
 
