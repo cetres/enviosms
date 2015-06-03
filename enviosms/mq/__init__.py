@@ -43,7 +43,7 @@ class MQ(object):
     _conn = None
     _queue = None
 
-    def __init__(self, url, config):
+    def __init__(self, url, config=None):
         self._url = MQ.urlparse(url)
         self._config = config
         self._logger = self._config.logger(self.__class__.__name__)
@@ -56,7 +56,7 @@ class MQ(object):
 
     def conectar(self):
         if not self._queue:
-        	self._conectar()
+            self._conectar()
 
     def enviar(self, mensagem, formato=None):
         self.conectar()
@@ -69,9 +69,9 @@ class MQ(object):
     def _enviar(self, mensagem):
         """Metodo para envio de mensagem a MQ """
 
-    def receber(self, formato=None):
+    def receber(self, formato=None, timeout=None):
         self.conectar()
-        mensagem = self._receber()
+        mensagem = self._receber(timeout)
         if formato and mensagem:
             if formato.lower() == "json":
                 mensagem = json.loads(mensagem)
@@ -105,7 +105,7 @@ class MQ(object):
 def mq_from_url(url):
     scheme = MQ.urlparse(url).scheme.lower()
     if scheme == "qpid":
-        return Qpid
+        return Qpid(url)
     else:
         raise MQError(None, 1)
 

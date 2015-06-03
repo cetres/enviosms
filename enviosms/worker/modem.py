@@ -3,13 +3,14 @@ import os
 import stat
 import serial
 import time
-import logging
 
+from enviosms.logging import Logging
 from .exceptions import ModemError
 
-logger = logging.getLogger("enviosms")
+logger = Logging.getLogger()
 
 class Modem:
+    """Modem class for communicating with serial modem"""
     _connected = False
     _message_initialized = False
     _xonxoff = False
@@ -19,17 +20,31 @@ class Modem:
     _stopbits = serial.STOPBITS_ONE
 
     def __init__(self, device, speed=57600, timeout=5):
+        """Constructor
+
+        :param device: file name of the device
+        :param speed: communication speed intefacing with the device
+        :param timeout: seconds for wainting after send a command
+        """
+        logger.info("Initializing on device %s at speed %s" % (device, speed))
         self.verify_file(device)
         self._device = device
         self._speed = speed
         self._timeout = timeout
 
     def verify_file(self, file_name):
+        """Verify if a file name is a device
+        
+        :param file_name: file name of the device
+        :return: True if is a device
+        """
         f_mode = os.stat(file_name).st_mode
         if not stat.S_ISCHR(f_mode):
             raise ModemError("Device file is not valid")
+        return True
 
     def connect(self):
+        """"Connect to the device"""
         if not self._serial:
             self._serial = serial.Serial(self._device,
                                      self._speed,
