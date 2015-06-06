@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 from .modem import Modem
-from .message import Message
+from enviosms.message import Message
 import logging
 
 logger = logging.getLogger("enviosms")

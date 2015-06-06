@@ -7,6 +7,7 @@ from qpid.messaging.exceptions import ConnectError
 
 from enviosms.gateway import app, exceptions
 from enviosms.gateway.config import Config
+from enviosms.submitter import SubmitSMS
 
 MSGS = {}
 CONFIG_FILE = 'enviosms_config.py'
@@ -25,15 +26,8 @@ def before_request():
     # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
     try:
         g.logger.debug("Starting MQ connection")
-        connection = Connection(g.conf.mq_host)
-        connection.open()
-        session = connection.session()
-        sender = session.sender(g.conf.mq_addr)
-
-        parser = reqparse.RequestParser()
-        parser.add_argument('msg_num', type=str)
-        parser.add_argument('msg_texto', type=str)
-    except ConnectError as e:
+        g.mq_sender = SubmitSMS(g.conf.mq_url)
+    except ConnectError:
         raise exceptions.MQError(2)
 
 
@@ -52,12 +46,12 @@ class Sms(Resource):
         return '', 204
 
     def put(self, msg_id):
-        args = parser.parse_args()
+        args = g.mq_parser.parse_args()
         msg = {
             'msg_num': args['msg_num'],
         	'msg_texto': args['msg_texto']
         }
-        sender.send(Message(msg))
+        g.mq_sender.submit(Message(msg))
         return msg, 201
 
 class SmsList(Resource):

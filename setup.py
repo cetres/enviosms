@@ -40,6 +40,6 @@ setup(
 
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
 
-    install_requires=['PySerial', 'flask', 'flask-restful', 'qpid-python'],
+    install_requires=['PySerial', 'boto', 'flask', 'flask-restful', 'qpid-python'],
 
 )

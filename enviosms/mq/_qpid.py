@@ -12,7 +12,7 @@ class Qpid(MQ):
     _timeout = 1
     def _conectar(self):
         try:
-            logger.debug("Regiao AWS: %s" % self._url.netloc)
+            logger.debug("Qpid: %s" % self._url.netloc)
             self._conn = Connection(self._url.netloc)
             if not self._conn:
                 raise MQError(None, 2)
@@ -20,7 +20,7 @@ class Qpid(MQ):
             self._session = self._conn.session()
             self._sender = self._session.sender(self._url.path[1:])
             self._receiver = self._session.receiver(self._url.path[1:])
-        except ConnectError as e:
+        except ConnectError:
             raise MQError(cod=2)
 
     def _enviar(self, mensagem):
