@@ -34,6 +34,8 @@ if __name__ == '__main__':
 	                  help="connect to specified message queue (default %default)")
 	parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
 	                  help="address for message queue (default %default)")
+	parser.add_option("-u", "--mq_url", dest="mq_url", default="qpid://localhost:5672/sms.sender",
+	                  help="url for message queue (default %default)")
 	parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
 	                  help="timeout in seconds to wait before exiting (default %default)")
 	parser.add_option("-l", "--log_file", dest="log_file", type="str",
