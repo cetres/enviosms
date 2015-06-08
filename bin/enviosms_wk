@@ -3,15 +3,15 @@
 
 import optparse
 
-from enviosms import logging
+from enviosms import _logging
 from enviosms.worker.modem import Modem
 from enviosms.worker.exceptions import ModemError
 from enviosms.mq import mq_from_url
 
 def start(device, opts):
 	try:
-		log_level = logging.DEBUG if opts.debug else logging.WARNING
-		logger = logging.Logging.setup(log_level, opts.log_file)
+		log_level = _logging.DEBUG if opts.debug else _logging.WARNING
+		logger = _logging.Logging.setup(log_level, opts.log_file)
 		modem = Modem(device)
 		mq = mq_from_url(opts.mq_url)
 		while True:

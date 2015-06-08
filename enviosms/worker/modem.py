@@ -4,7 +4,7 @@ import stat
 import serial
 import time
 
-from enviosms.logging import Logging
+from enviosms._logging import Logging
 from .exceptions import ModemError
 
 logger = Logging.getLogger()
@@ -18,6 +18,7 @@ class Modem:
     _bytesize = serial.EIGHTBITS
     _parity = serial.PARITY_NONE
     _stopbits = serial.STOPBITS_ONE
+    _serial = None
 
     def __init__(self, device, speed=57600, timeout=5):
         """Constructor
@@ -46,9 +47,9 @@ class Modem:
     def connect(self):
         """"Connect to the device"""
         if not self._serial:
-            self._serial = serial.Serial(self._device,
-                                     self._speed,
-                                     self._timeout,
+            self._serial = serial.Serial(port = self._device,
+                                     baudrate = self._speed,
+                                     timeout = self._timeout,
                                      xonxoff = self._xonxoff,
                                      rtscts = self._rtscts,
                                      bytesize = self._bytesize,
@@ -70,7 +71,7 @@ class Modem:
             if newline:
                 self._serial.write("\r")
             if getline or expect:
-                data = self.read_ine()
+                data = self.read_line()
                 if expect and data != expect:
                     raise ModemError("Return not expected")
                 if getline:
