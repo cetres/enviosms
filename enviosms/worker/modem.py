@@ -89,7 +89,8 @@ class Modem:
 
     def send_message(self, message):
         self.init_message()
-        self.send_command('AT+CMGS="' + message.recipient + '"', False)
+        #self.send_command('AT+CMGS="' + message.recipient + '"', False)
+        self.send_command('AT+CMGS=' + message.recipient, False)
         self.send_command(message.content, False)
         self._serial.write(chr(26))
         time.sleep(1)
