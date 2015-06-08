@@ -67,7 +67,10 @@ class Modem:
             return data 
 
     def send_command(self, command, getline=True, newline=True, expect=None):
-            self._serial.write(command)
+            try:
+                self._serial.write(command)
+            except:
+                raise ModemError("Erro no comando - %s" % command)
             if newline:
                 self._serial.write("\r")
             if getline or expect:
