@@ -16,7 +16,7 @@ def start(device, opts):
 		modem = Modem(device)
 		mq = mq_from_url(opts.mq_url)
 		while True:
-			msg = MessageSMS(json=mq.receber())
+			msg = MessageSMS(json_str=mq.receber())
 			modem.send_message(msg)
 	except ModemError as e:
 		logger.critical(e)

@@ -31,5 +31,5 @@ class MessageSMS(object):
         self._content = content
 
     def to_json(self):
-        return json.dumps({"repipient": self.recipient,
+        return json.dumps({"recipient": self.recipient,
                            "content": self.content})
