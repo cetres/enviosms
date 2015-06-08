@@ -17,7 +17,7 @@ def send(opts):
 
 
 if __name__ == '__main__':
-	parser = optparse.OptionParser(usage="usage: %prog [options] <device>",
+	parser = optparse.OptionParser(usage="usage: %prog [options]",
 								   description="Sender for SMS messages at specific device path")
 	parser.add_option("-m", "--message", dest="msg",
 	                  help="Message to be sent")

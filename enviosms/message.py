@@ -15,12 +15,20 @@ class MessageSMS(object):
             self._content = content
 
     @property
+    def recipient(self):
+        return self._recipient
+    
+    @recipient.setter
     def recipient(self, number):
-        self.recipient = number
+        self._recipient = number
 
     @property
+    def content(self):
+        return self._content
+
+    @content.setter
     def content(self, content):
-        self.content = content
+        self._content = content
 
     def to_json(self):
         return json.dumps({"repipient": self.recipient,
