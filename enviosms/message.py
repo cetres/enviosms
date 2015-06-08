@@ -5,9 +5,9 @@ import json
 logger = logging.getLogger("enviosms")
 
 class MessageSMS(object):
-    def __init__(self, recipient=None, content=None, json=None):
-        if json:
-            data = json.loads(json)
+    def __init__(self, recipient=None, content=None, json_str=None):
+        if json_str:
+            data = json.loads(json_str)
             self._recipient = data["recipient"]
             self._content = data["content"]
         else:
