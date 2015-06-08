@@ -68,7 +68,7 @@ class Modem:
 
     def send_command(self, command, getline=True, newline=True, expect=None):
             try:
-                self._serial.write(command)
+                self._serial.write(str(command))
             except:
                 raise ModemError("Erro no comando - %s" % command)
             if newline:
@@ -89,8 +89,7 @@ class Modem:
 
     def send_message(self, message):
         self.init_message()
-        #self.send_command('AT+CMGS="' + message.recipient + '"', False)
-        self.send_command('AT+CMGS=' + message.recipient, False)
+        self.send_command('AT+CMGS="' + message.recipient + '"', False)
         self.send_command(message.content, False)
         self._serial.write(chr(26))
         time.sleep(1)
