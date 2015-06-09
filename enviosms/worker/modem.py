@@ -36,7 +36,7 @@ class Modem:
 
     def verify_file(self, file_name):
         """Verify if a file name is a device
-        
+
         :param file_name: file name of the device
         :return: True if is a device
         """

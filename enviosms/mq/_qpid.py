@@ -22,7 +22,7 @@ class Qpid(MQ):
             self._session = self._conn.session()
             self._sender = self._session.sender(self._url.path[1:])
             self._receiver = self._session.receiver(self._url.path[1:])
-            logger.debug("Connected on queue %s" % self._url.netloc)
+            logger.info("Connected on queue %s" % self._url.netloc)
         except ConnectError:
             raise MQError(cod=2)
 

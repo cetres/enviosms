@@ -17,7 +17,7 @@ def start(device, opts):
         modem = Modem(device)
         mq = mq_from_url(opts.mq_url)
         while True:
-            logger.debug("Reading queue...")
+            logger.info("Reading queue...")
             msg = MessageSMS(json_str=mq.receber())
             modem.send_message(msg)
             mq.excluir()
