@@ -22,14 +22,17 @@ class Qpid(MQ):
             self._session = self._conn.session()
             self._sender = self._session.sender(self._url.path[1:])
             self._receiver = self._session.receiver(self._url.path[1:])
+            logger.debug("Connected on queue %s" % self._url.netloc)
         except ConnectError:
             raise MQError(cod=2)
 
     def _enviar(self, mensagem):
+        logger.debug("Sending a message")
         m = Message(mensagem)
         self._sender.send(m, True, self._timeout)
 
     def _receber(self, timeout=None):
+        logger.debug("Retrieving a message")
         self._mensagem = self._receiver.fetch(timeout)
         return self._mensagem.content
 
@@ -37,7 +40,8 @@ class Qpid(MQ):
         self._receiver.available()
 
     def _excluir(self):
-        self._session.acknowledge()
+        logger.debug("Ack last message")
+        self._session.acknowledge(self._mensagem)
 
     def _terminar(self):
         self._conn.close(self._timeout)

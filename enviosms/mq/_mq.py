@@ -6,6 +6,7 @@ import logging
 
 logger = logging.getLogger("enviosms")
 
+
 class MQError(Exception):
     _errors = {
         1: "Classe com a URI nao encontrada",
