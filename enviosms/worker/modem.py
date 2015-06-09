@@ -9,6 +9,7 @@ from .exceptions import ModemError
 
 logger = Logging.getLogger()
 
+
 class Modem:
     """Modem class for communicating with serial modem"""
     _connected = False
@@ -47,14 +48,16 @@ class Modem:
     def connect(self):
         """"Connect to the device"""
         if not self._serial:
-            self._serial = serial.Serial(port = self._device,
-                                     baudrate = self._speed,
-                                     timeout = self._timeout,
-                                     xonxoff = self._xonxoff,
-                                     rtscts = self._rtscts,
-                                     bytesize = self._bytesize,
-                                     parity = self._parity,
-                                     stopbits = self._stopbits)
+            self._serial = serial.Serial(
+                port = self._device,
+                baudrate = self._speed,
+                timeout = self._timeout,
+                xonxoff = self._xonxoff,
+                rtscts = self._rtscts,
+                bytesize = self._bytesize,
+                parity = self._parity,
+                stopbits = self._stopbits
+            )
             time.sleep(1)
 
     def flush(self):
@@ -63,11 +66,12 @@ class Modem:
 
     def read_line(self):
             data = self._serial.readline()
-            print data
-            return data 
+            logger.debug("<" + data)
+            return data
 
     def send_command(self, command, getline=True, newline=True, expect=None):
             try:
+                logger.debug(">" + str(command))
                 self._serial.write(str(command))
             except:
                 raise ModemError("Erro no comando - %s" % command)

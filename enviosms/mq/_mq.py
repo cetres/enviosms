@@ -2,9 +2,10 @@
 import abc
 from urlparse import urlparse
 import json
-import logging
 
-logger = logging.getLogger("enviosms")
+from enviosms._logging import Logging
+
+logger = Logging.getLogger()
 
 
 class MQError(Exception):

@@ -1,12 +1,12 @@
 # -*- coding: UTF-8 -*-
-import logging
 
+from enviosms._logging import Logging
 from qpid.messaging import Connection, Message
 from qpid.messaging.exceptions import ConnectError
 
 from enviosms.mq import MQ, MQError
 
-logger = logging.getLogger("enviosms")
+logger = Logging.getLogger()
 
 
 class Qpid(MQ):
@@ -41,7 +41,7 @@ class Qpid(MQ):
 
     def _excluir(self):
         logger.debug("Ack last message")
-        self._session.acknowledge(self._mensagem)
+        self._session.acknowledge()
 
     def _terminar(self):
         self._conn.close(self._timeout)
