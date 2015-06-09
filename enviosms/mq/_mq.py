@@ -39,6 +39,7 @@ class MQ(object):
     _config = None
     _conn = None
     _queue = None
+    _connected = False
 
     def __init__(self, url, config=None):
         self._url = MQ.urlparse(url)
@@ -51,8 +52,9 @@ class MQ(object):
         """ Metodo para estabelecimento de conexao com o MQ """
 
     def conectar(self):
-        if not self._queue:
+        if not self._connected:
             self._conectar()
+            self._connected = True
 
     def enviar(self, mensagem, formato=None):
         self.conectar()
@@ -96,4 +98,3 @@ class MQ(object):
     @staticmethod
     def urlparse(url):
         return urlparse(url)
-
