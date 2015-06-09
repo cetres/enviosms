@@ -60,3 +60,4 @@ target/
 *.pui
 .pydevproject
 .project
+.settings

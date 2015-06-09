@@ -6,36 +6,37 @@ import optparse
 from enviosms import _logging
 from enviosms.submitter import SubmitSMS
 
+
 def send(opts):
-	try:
-		log_level = _logging.DEBUG if opts.debug else _logging.WARNING
-		logger = _logging.Logging.setup(log_level, opts.log_file)
-		sms = SubmitSMS(opts.mq_url)
-		sms.submit(opts.rcpt, opts.msg)
-	except Exception as e:
-		logger.critical(e)
+    try:
+        log_level = _logging.DEBUG if opts.debug else _logging.WARNING
+        logger = _logging.Logging.setup(log_level, opts.log_file)
+        sms = SubmitSMS(opts.mq_url)
+        sms.submit(opts.rcpt, opts.msg)
+    except Exception as e:
+        logger.critical(e)
 
 
 if __name__ == '__main__':
-	parser = optparse.OptionParser(usage="usage: %prog [options]",
-								   description="Sender for SMS messages at specific device path")
-	parser.add_option("-m", "--message", dest="msg",
-	                  help="Message to be sent")
-	parser.add_option("-r", "--recipient", dest="rcpt", 
-	                  help="Recipient telephone number")
-	parser.add_option("-u", "--mq_url", dest="mq_url", default="qpid://localhost:5672/sms.sender",
-	                  help="url for message queue (default %default)")
-	parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
-	                  help="timeout in seconds to wait before exiting (default %default)")
-	parser.add_option("-l", "--log_file", dest="log_file", type="str",
-	                  help="Log file path")
-	parser.add_option("-d", dest="debug", action="store_true",
-	                  help="Enable debugging")
-	opts, args = parser.parse_args()
+    parser = optparse.OptionParser(usage="usage: %prog [options]",
+                                   description="Sender for SMS messages at specific device path")
+    parser.add_option("-m", "--message", dest="msg",
+                      help="Message to be sent")
+    parser.add_option("-r", "--recipient", dest="rcpt", 
+                      help="Recipient telephone number")
+    parser.add_option("-u", "--mq_url", dest="mq_url", default="qpid://localhost:5672/sms.sender",
+                      help="url for message queue (default %default)")
+    parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
+                      help="timeout in seconds to wait before exiting (default %default)")
+    parser.add_option("-l", "--log_file", dest="log_file", type="str",
+                      help="Log file path")
+    parser.add_option("-d", dest="debug", action="store_true",
+                      help="Enable debugging")
+    opts, args = parser.parse_args()
 
-	try:
-		send(opts)
-	except OSError as e:
-		print(e)
-	except KeyboardInterrupt:
-		pass
+    try:
+        send(opts)
+    except OSError as e:
+        print(e)
+    except KeyboardInterrupt:
+        pass

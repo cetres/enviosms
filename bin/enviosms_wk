@@ -9,49 +9,51 @@ from enviosms.worker.exceptions import ModemError
 from enviosms.message import MessageSMS
 from enviosms.mq import mq_from_url
 
+
 def start(device, opts):
-	try:
-		log_level = _logging.DEBUG if opts.debug else _logging.WARNING
-		logger = _logging.Logging.setup(log_level, opts.log_file)
-		modem = Modem(device)
-		mq = mq_from_url(opts.mq_url)
-		while True:
-			msg = MessageSMS(json_str=mq.receber())
-			modem.send_message(msg)
-	except ModemError as e:
-		logger.critical(e)
-	finally:
-		try:
-			modem.disconnect()
-			logger.info("Disconnecting")
-		except:
-			logger.error("Except on disconnecting")
-			pass
+    try:
+        log_level = _logging.DEBUG if opts.debug else _logging.WARNING
+        logger = _logging.Logging.setup(log_level, opts.log_file)
+        modem = Modem(device)
+        mq = mq_from_url(opts.mq_url)
+        while True:
+            msg = MessageSMS(json_str=mq.receber())
+            modem.send_message(msg)
+            mq.excluir()
+    except ModemError as e:
+        logger.critical(e)
+    finally:
+        try:
+            modem.disconnect()
+            logger.info("Disconnecting")
+        except:
+            logger.error("Except on disconnecting")
+            pass
 
 
 if __name__ == '__main__':
-	parser = optparse.OptionParser(usage="usage: %prog [options] <device>",
-								   description="Worker for SMS messages at specific device path")
-	parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
-	                  help="connect to specified message queue (default %default)")
-	parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
-	                  help="address for message queue (default %default)")
-	parser.add_option("-u", "--mq_url", dest="mq_url", default="qpid://localhost:5672/sms.sender",
-	                  help="url for message queue (default %default)")
-	parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
-	                  help="timeout in seconds to wait before exiting (default %default)")
-	parser.add_option("-l", "--log_file", dest="log_file", type="str",
-	                  help="Log file path")
-	parser.add_option("-d", dest="debug", action="store_true",
-	                  help="Enable debugging")
-	opts, args = parser.parse_args()
+    parser = optparse.OptionParser(usage="usage: %prog [options] <device>",
+                                   description="Worker for SMS messages at specific device path")
+    parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
+                      help="connect to specified message queue (default %default)")
+    parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+                      help="address for message queue (default %default)")
+    parser.add_option("-u", "--mq_url", dest="mq_url", default="qpid://localhost:5672/sms.sender",
+                      help="url for message queue (default %default)")
+    parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
+                      help="timeout in seconds to wait before exiting (default %default)")
+    parser.add_option("-l", "--log_file", dest="log_file", type="str",
+                      help="Log file path")
+    parser.add_option("-d", dest="debug", action="store_true",
+                      help="Enable debugging")
+    opts, args = parser.parse_args()
 
-	try:
-		if len(args) == 0:
-			parser.error("No device specified")
-		device = args[0]
-		start(device, opts)
-	except OSError as e:
-		print(e)
-	except KeyboardInterrupt:
-		pass
+    try:
+        if len(args) == 0:
+            parser.error("No device specified")
+        device = args[0]
+        start(device, opts)
+    except OSError as e:
+        print(e)
+    except KeyboardInterrupt:
+        pass

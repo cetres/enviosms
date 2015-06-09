@@ -8,8 +8,10 @@ from enviosms.mq import MQ, MQError
 
 logger = logging.getLogger("enviosms")
 
+
 class Qpid(MQ):
     _timeout = 1
+
     def _conectar(self):
         try:
             logger.debug("Qpid: %s" % self._url.netloc)
@@ -36,6 +38,6 @@ class Qpid(MQ):
 
     def _excluir(self):
         self._session.acknowledge()
-    
+
     def _terminar(self):
         self._conn.close(self._timeout)
