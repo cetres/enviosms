@@ -81,6 +81,8 @@ class Modem:
        #return binascii.hexlify(unicode(dados).encode('utf-8'))
 
     def _encodeSemiOctets(self, number):
+        if number[0] == '+':
+            number = number[1:]
         if len(number) % 2 == 1:
             number = number + 'F'
         octets = [int(number[i+1] + number[i], 16) for i in xrange(0, len(number), 2)]
@@ -141,13 +143,16 @@ class Modem:
                 payload_len = m1 - m0
                 msg_part = self._hexlify(message.content[m0:m1])
                 logger.info("Payload length: %d (%s)" % (payload_len,message.content[m0:m1] ))
+                rcpt = message.recipient
+                if rcpt[0] == '+':
+                    rcpt = rcpt[1:]
                 #msg_udh1 = "0011%02X%02X81" % (i, len(message.recipient))
                 #msg_udh2 = "0000AA%02X" % (payload_len)
-                msg_udh1 = "000100%02X81" % ( len(message.recipient))
-                msg_udh2 = "0008%02X" % (payload_len)
-                #msg_udh1 = "0041%02X%02X91" % (i, len(message.recipient))
-                #msg_udh2 = "0000%02X05000300%02X%02X" % (payload_len,msg_count,i+1)
-                destino_so = self._encodeSemiOctets(message.recipient)
+                #msg_udh1 = "000100%02X81" % ( len(message.recipient))
+                #msg_udh2 = "0008%02X" % (payload_len)
+                msg_udh1 = "0041%02X%02X91" % (i, len(rcpt))
+                msg_udh2 = "0008%02X05000300%02X%02X" % (payload_len,msg_count,i+1)
+                destino_so = self._encodeSemiOctets(rcpt)
                 pdu = msg_udh1 + destino_so + msg_udh2 + msg_part
                 self.send_command('AT+CMGS="%d"' % ((len(pdu)-2)/2))
                 self.write(pdu)
