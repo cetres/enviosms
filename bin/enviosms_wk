@@ -19,7 +19,7 @@ def start(device, opts):
         while True:
             logger.info("Reading queue...")
             msg = MessageSMS(json_str=mq.receber())
-            modem.send_message(msg)
+            modem.send_message(msg, force_pdu=True)
             mq.excluir()
     except ModemError as e:
         logger.critical(e)

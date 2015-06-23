@@ -5,6 +5,7 @@ import stat
 import serial
 import time
 import binascii
+from random import randint
 
 from enviosms._logging import Logging
 from .exceptions import ModemError
@@ -23,6 +24,7 @@ class Modem:
     _stopbits = serial.STOPBITS_ONE
     _serial = None
     _pdu_mode = None
+    _mr = -1
 
     def __init__(self, device, speed=57600, timeout=5):
         """Constructor
@@ -76,8 +78,15 @@ class Modem:
         self._serial.flushInput()
         self._serial.flushOutput()
 
+    @property
+    def mr(self):
+        self._mr+=1
+        if self._mr>255:
+            self._mr=0
+        return self._mr
+
     def _hexlify(self, dados):
-       return binascii.hexlify(unicode(dados).encode('utf-16-be'))
+       return binascii.hexlify(unicode(dados).encode('utf-16-be')).upper()
        #return binascii.hexlify(unicode(dados).encode('utf-8'))
 
     def _encodeSemiOctets(self, number):
@@ -128,13 +137,14 @@ class Modem:
             self.send_command('AT+CSCS="UCS2"')
             self._message_initialized = True
 
-    def send_message(self, message):
+    def send_message(self, message, force_pdu=False):
         self.init_message()
         msg_len = len(message.content)
-        if msg_len > 160:
+        if msg_len > 160 or force_pdu:
             self.set_pdu_mode()
-            max_size=67
+            max_size=61
             msg_count=int(math.ceil(msg_len/float(max_size)))
+            ref_number=randint(0,255)
             for i in range(msg_count):
                 m0=i*max_size
                 m1=(i+1)*max_size
@@ -145,16 +155,23 @@ class Modem:
                 logger.info("Payload length: %d (%s)" % (payload_len,message.content[m0:m1] ))
                 rcpt = message.recipient
                 if rcpt[0] == '+':
+                    num_type=91
                     rcpt = rcpt[1:]
-                #msg_udh1 = "0011%02X%02X81" % (i, len(message.recipient))
+                else:
+                    num_type=81
+                #msg_udh1 = "0011%02X%02X%02d" % (i, len(rcpt), num_type)
                 #msg_udh2 = "0000AA%02X" % (payload_len)
-                #msg_udh1 = "000100%02X81" % ( len(message.recipient))
-                #msg_udh2 = "0008%02X" % (payload_len)
-                msg_udh1 = "0041%02X%02X91" % (i, len(rcpt))
-                msg_udh2 = "0008%02X05000300%02X%02X" % (payload_len,msg_count,i+1)
+
+                #msg_udh1 = "000100%02X%02d" % (len(rcpt), num_type)
+                #msg_udh2 = "0008%02X" % (len(msg_part)/2)
+
+                msg_udh1 = "0041%02X%02X%02d" % (self.mr, len(rcpt), num_type)
+                #msg_udh1 = "004100%02X%02d" % (len(rcpt), num_type)
+                msg_udh2 = "0008%02X050003%02X%02X%02X" % (len(msg_part)/2+6, ref_number, msg_count, i+1)
+
                 destino_so = self._encodeSemiOctets(rcpt)
                 pdu = msg_udh1 + destino_so + msg_udh2 + msg_part
-                self.send_command('AT+CMGS="%d"' % ((len(pdu)-2)/2))
+                self.send_command('AT+CMGS=%d' % ((len(pdu)-2)/2))
                 self.write(pdu)
                 self.write(chr(26))
                 time.sleep(1)
