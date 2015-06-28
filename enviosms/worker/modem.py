@@ -24,7 +24,8 @@ class Modem:
     _stopbits = serial.STOPBITS_ONE
     _serial = None
     _pdu_mode = None
-    _mr = -1
+    _msg_send_time = 0               # Last message duration time to send
+    _mr = -1                         # Message reference number
 
     def __init__(self, device, speed=57600, timeout=5):
         """Constructor
@@ -147,6 +148,7 @@ class Modem:
             self._message_initialized = True
 
     def send_message(self, message, force_pdu=False, force_udh=False, tp_vpf=None):
+        t0 = time.time()
         self.init_message()
         msg_len = len(message.content)
         if msg_len > 160 or force_pdu:
@@ -175,10 +177,6 @@ class Modem:
                     rcpt = rcpt[1:]
                 else:
                     num_type=81
-
-                #tpdu1 = "000100%02X%02d" % (len(rcpt), num_type)
-                #tpdu2 = "0008%02X" % (len(msg_part)/2)
-
                 if msg_count > 1 or force_udh:
                     tp_class |= 0x40
                     tpdu1 = "00%02X%02X%02X%02d" % (tp_class, self.mr, len(rcpt), num_type)
@@ -202,6 +200,8 @@ class Modem:
             self.write(chr(26))
             time.sleep(1)
             self.read()
+        self._msg_send_time = time.time() - t0
+        logger.info("Time: %.1f sec" % self._msg_send_time)
 
     def read_messages(self):
         self.connect()
