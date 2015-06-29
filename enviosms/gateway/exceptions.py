@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+
 class MQError(Exception):
     _errors = {
         1: "Classe com a URI nao encontrada",

@@ -1,35 +1,43 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: UTF-8 -*-
 
 import optparse
 import re
 
 from enviosms.gateway import app, exceptions
-from enviosms.gateway.config import Config
 
 
 def start(opts):
     app.debug = opts.debug
     bind_ip, bind_port = opts.bind.split(":")
     app.config["DEBUG"] = opts.debug
+    app.config["MQ_ENGINE"] = opts.mq_engine
     app.config["MQ_HOST"] = opts.mq_host
     app.config["MQ_ADDR"] = opts.mq_addr
     app.config["TIMEOUT"] = opts.timeout
-    app.run(host=bind_ip, port=int(bind_port))
+    app.run(host=bind_ip, port=int(bind_port), debug=opts.debug)
 
 if __name__ == '__main__':
-    parser = optparse.OptionParser(usage="usage: %prog [options]",
-                                   description="Gateway for SMS messages")
-    parser.add_option("-m", "--mq_host", dest="mq_host", default="localhost:5672",
-                      help="connect to specified message queue (default %default)")
-    parser.add_option("-a", "--mq_addr", dest="mq_addr", default="sms.sender",
-                      help="address for message queue (default %default)")
-    parser.add_option("-t", "--timeout", dest="timeout", type="float", default=0,
-                      help="timeout in seconds to wait before exiting (default %default)")
-    parser.add_option("-i", "--bind", dest="bind", default="0.0.0.0:80",
-                      help="Bind a specific IP address and port (default %default)")
-    parser.add_option("-d", dest="debug", action="store_true",
-                      help="enable debugging")
+    parser = optparse.OptionParser(
+        usage="usage: %prog [options]", description="Gateway for SMS messages")
+    parser.add_option(
+        "-e", "--mq_engine", dest="mq_engine", default="qpid",
+        help="message queue engine (default %default)")
+    parser.add_option(
+        "-m", "--mq_host", dest="mq_host", default="localhost:5672",
+        help="connect to specified message queue (default %default)")
+    parser.add_option(
+        "-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+        help="address for message queue (default %default)")
+    parser.add_option(
+        "-t", "--timeout", dest="timeout", type="float", default=0,
+        help="timeout in seconds to wait before exiting (default %default)")
+    parser.add_option(
+        "-i", "--bind", dest="bind", default="0.0.0.0:80",
+        help="Bind a specific IP address and port (default %default)")
+    parser.add_option(
+        "-d", dest="debug", action="store_true",
+        help="enable debugging")
     opts, args = parser.parse_args()
 
     try:

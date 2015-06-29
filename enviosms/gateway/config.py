@@ -4,6 +4,7 @@
 
 import os
 import logging
+import urlparse
 
 LOCAL_LOG_PATH = "/var/log/enviosms"
 LOCAL_LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
@@ -28,13 +29,13 @@ class Config(object):
         self._app = app
         self.mq_host = app.config.get("MQ_HOST")
         self.mq_addr = app.config.get("MQ_ADDR")
-
+        self.mq_engine = app.config.get("MQ_ENGINE")
 
     def load_config(self, arquivo):
         arquivo = os.path.join(self._root_path, arquivo)
         if os.path.exists(arquivo):
-            #self.logger
-            #raise ConfigError("Arquivo nao encontrado: %s" % str(arquivo))
+            # self.logger
+            # raise ConfigError("Arquivo nao encontrado: %s" % str(arquivo))
             execfile(arquivo, self._config)
 
     @property
@@ -52,6 +53,20 @@ class Config(object):
     @mq_addr.setter
     def mq_addr(self, value):
         self._config["mq_addr"] = value
+
+    @property
+    def mq_url(self):
+        return urlparse.urljoin(
+            "%s://%s" % (self._config["mq_engine"], self._config["mq_host"]),
+            self._config["mq_addr"])
+
+    @mq_url.setter
+    def mq_url(self, value):
+        self._config["mq_url"] = value
+        url = urlparse.urlparse(value)
+        self._config["mq_engine"] = url.scheme.lower()
+        self._config["mq_host"] = url.netloc.lower()
+        self._config["mq_addr"] = url.path
 
     @property
     def timeout(self):
@@ -74,21 +89,22 @@ class Config(object):
 
     def _logger_handler_file(self):
         global LOCAL_LOG_FORMAT, LOCAL_LOG_LEVEL
-        if not self._log_handler:
-            log_path = self.local_log_file
-            if not os.path.exists(log_path):
-                try:
-                    log_dir = os.path.dirname(log_path)
+        try:
+            log_dir = ""
+            if not self._log_handler:
+                log_path = self.local_log_file
+                log_dir = os.path.dirname(log_path)
+                if not os.path.exists(log_dir):
                     logging.critical("Caminho de log nao existe. "
                                      "Tentando criar %s" % log_dir)
                     os.mkdir(log_dir)
-                except OSError:
-                    raise ConfigError("Impossivel criar pasta de log %s" % log_dir)
-            self._log_handler = logging.FileHandler(log_path)
-            formatter = logging.Formatter(LOCAL_LOG_FORMAT)
-            self._log_handler.setFormatter(formatter)
-            log_level = self._config.get("local_log_level", LOCAL_LOG_LEVEL)
-            self._log_handler.setLevel(log_level)
+                self._log_handler = logging.FileHandler(log_path)
+                formatter = logging.Formatter(LOCAL_LOG_FORMAT)
+                self._log_handler.setFormatter(formatter)
+                log_level = self._config.get("local_log_level", LOCAL_LOG_LEVEL)
+                self._log_handler.setLevel(log_level)
+        except OSError:
+            raise ConfigError("Impossivel criar pasta de log %s" % log_dir)
         return self._log_handler
 
     def logger(self, modulo):

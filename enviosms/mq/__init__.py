@@ -10,11 +10,13 @@ from .sqs import SQS
 
 logger = logging.getLogger("enviosms")
 
+
 def mq_from_url(url):
     scheme = MQ.urlparse(url).scheme.lower()
     if scheme == "qpid":
         return Qpid(url)
     else:
-        raise MQError(None, 1)
+        logger.debug("Open MQ URL: %s" % url)
+        raise MQError("MQ schema not found: %s (URL: %s)" % (scheme, url), 1)
 
-__all__ = ['Qpid','MQ', 'SMS', 'MQError', 'mq_from_url']
+__all__ = ['Qpid', 'MQ', 'SMS', 'MQError', 'mq_from_url']

@@ -12,21 +12,27 @@ from enviosms.submitter import SubmitSMS
 MSGS = {}
 CONFIG_FILE = 'enviosms_config.py'
 
+
 def load_config():
     global app, CONFIG_FILE
     conf = Config(app)
     conf.load_config(CONFIG_FILE)
     return conf
 
-@app.before_request
-def before_request():
+
+@app.before_first_request
+def before_first_request():
     g.conf = load_config()
     g.logger = g.conf.logger(__name__)
+    g.logger.debug("Config loaded")
 
+
+@app.before_request
+def before_request():
     # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
     try:
         g.logger.debug("Starting MQ connection")
-        g.mq_sender = SubmitSMS(g.conf.mq_url)
+        g.mq_sender = SubmitSMS(g.conf.mq_addr)
     except ConnectError:
         raise exceptions.MQError(2)
 
@@ -34,6 +40,7 @@ def before_request():
 def abort_if_sms_doesnt_exist(msg_id):
     if msg_id not in MSGS:
         abort(404, message="SMS {} nao existe".format(msg_id))
+
 
 class Sms(Resource):
     def get(self, msg_id):
@@ -49,10 +56,11 @@ class Sms(Resource):
         args = g.mq_parser.parse_args()
         msg = {
             'msg_num': args['msg_num'],
-        	'msg_texto': args['msg_texto']
+            'msg_texto': args['msg_texto']
         }
         g.mq_sender.submit(Message(msg))
         return msg, 201
+
 
 class SmsList(Resource):
     def get(self):

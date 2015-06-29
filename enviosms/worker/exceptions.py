@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+
 class ModemError(Exception):
     _errors = {
         1: "Classe com a URI nao encontrada",

@@ -8,6 +8,7 @@ Created on 06/06/2015
 from enviosms.mq import mq_from_url
 from enviosms.message import MessageSMS
 
+
 class SubmitSMS(object):
     def __init__(self, mq_url):
         self._mq = mq_from_url(mq_url)

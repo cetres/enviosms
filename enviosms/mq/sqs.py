@@ -2,12 +2,13 @@
 
 import logging
 from boto import sqs
-#from boto.sqs.queue import Queue
+# from boto.sqs.queue import Queue
 from boto.sqs.message import Message
 
 from ._mq import MQ, MQError
 
 logger = logging.getLogger("enviosms")
+
 
 class SQS(MQ):
     def _conectar(self):

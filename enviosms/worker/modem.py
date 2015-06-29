@@ -55,14 +55,14 @@ class Modem:
         """"Connect to the device"""
         if not self._serial:
             self._serial = serial.Serial(
-                port = self._device,
-                baudrate = self._speed,
-                timeout = self._timeout,
-                xonxoff = self._xonxoff,
-                rtscts = self._rtscts,
-                bytesize = self._bytesize,
-                parity = self._parity,
-                stopbits = self._stopbits
+                port=self._device,
+                baudrate=self._speed,
+                timeout=self._timeout,
+                xonxoff=self._xonxoff,
+                rtscts=self._rtscts,
+                bytesize=self._bytesize,
+                parity=self._parity,
+                stopbits=self._stopbits
             )
             self.flush()
             time.sleep(1)
@@ -81,14 +81,13 @@ class Modem:
 
     @property
     def mr(self):
-        self._mr+=1
-        if self._mr>255:
-            self._mr=0
+        self._mr += 1
+        if self._mr > 255:
+            self._mr = 0
         return self._mr
 
     def _hexlify(self, dados):
-       return binascii.hexlify(unicode(dados).encode('utf-16-be')).upper()
-       #return binascii.hexlify(unicode(dados).encode('utf-8'))
+        return binascii.hexlify(unicode(dados).encode('utf-16-be')).upper()
 
     def _encodeSemiOctets(self, number):
         if number[0] == '+':
@@ -104,8 +103,8 @@ class Modem:
         return data
 
     def write(self, dados):
-       logger.info(">" + str(dados))
-       self._serial.write(dados)
+        logger.info(">" + str(dados))
+        self._serial.write(dados)
 
     def send_command(self, command, getline=True, newline=True, append=None, expect=None):
             self.flush()
@@ -134,12 +133,12 @@ class Modem:
     def set_pdu_mode(self):
         if self._pdu_mode is not True:
             self.send_command('AT+CMGF=0', expect="OK")
-            self._pdu_mode=True
+            self._pdu_mode = True
 
     def set_text_mode(self):
         if self._pdu_mode is not False:
             self.send_command('AT+CMGF=1', expect="OK")
-            self._pdu_mode=False
+            self._pdu_mode = False
 
     def init_message(self):
         if not self._message_initialized:
@@ -153,38 +152,38 @@ class Modem:
         msg_len = len(message.content)
         if msg_len > 160 or force_pdu:
             self.set_pdu_mode()
-            tp_class=0x01
-            dcs=0x08
+            tp_class = 0x01
+            dcs = 0x08
             if tp_vpf is not None:
-                tp_class|=0x10
+                tp_class |= 0x10
                 tp_vpf = "%02X" % tp_vpf
             else:
                 tp_vpf = ""
-            max_size=60
-            msg_count=int(math.ceil(msg_len/float(max_size)))
-            ref_number=randint(0, 255)
+            max_size = 60
+            msg_count = int(math.ceil(msg_len/float(max_size)))
+            ref_number = randint(0, 255)
             for i in range(msg_count):
-                m0=i*max_size
-                m1=(i+1)*max_size
+                m0 = i*max_size
+                m1 = (i+1)*max_size
                 if m1 > msg_len:
-                    m1=msg_len
+                    m1 = msg_len
                 msg_part = self._hexlify(message.content[m0:m1])
                 udl = len(msg_part)/2
                 logger.info("Payload length: %d (%s)" % (udl, message.content[m0:m1] ))
                 rcpt = message.recipient
                 if rcpt[0] == '+':
-                    num_type=91
+                    num_type = 0x91
                     rcpt = rcpt[1:]
                 else:
-                    num_type=81
+                    num_type = 0x81
                 if msg_count > 1 or force_udh:
                     tp_class |= 0x40
-                    tpdu1 = "00%02X%02X%02X%02d" % (tp_class, self.mr, len(rcpt), num_type)
+                    tpdu1 = "00%02X%02X%02X%02X" % (tp_class, self.mr, len(rcpt), num_type)
                     udh = "050003%02X%02X%02X" % (ref_number, msg_count, i+1)
                     udl += len(udh)/2
                     tpdu2 = "00%02X%s%02X%s" % (dcs, tp_vpf, udl, udh)
                 else:
-                    tpdu1 = "00%02X%02X%02X%02d" % (tp_class, self.mr, len(rcpt), num_type)
+                    tpdu1 = "00%02X%02X%02X%02X" % (tp_class, self.mr, len(rcpt), num_type)
                     tpdu2 = "00%02X%s%02X" % (dcs, tp_vpf, udl)
 
                 logger.info("TP: %02X DCS: %02X UDL: %02X (%d)" % (tp_class, dcs, udl, udl))
@@ -194,7 +193,7 @@ class Modem:
                 self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS")
         else:
             self.set_text_mode()
-            destino=self._hexlify(message.recipient)
+            destino = self._hexlify(message.recipient)
             self.send_command('AT+CMGS="' + destino + '"')
             self.write(self._hexlify(message.content))
             self.write(chr(26))
