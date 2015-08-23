@@ -1,5 +1,6 @@
 from flask import Flask
 
 app = Flask(__name__)
+# app.config.from_object('config.Config')
 
 from enviosms.gateway import index

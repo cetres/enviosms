@@ -27,7 +27,8 @@ if __name__ == '__main__':
         "-m", "--mq_host", dest="mq_host", default="localhost:5672",
         help="connect to specified message queue (default %default)")
     parser.add_option(
-        "-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+        # "-a", "--mq_addr", dest="mq_addr", default="sms.sender",
+        "-a", "--mq_addr", dest="mq_addr", default="qpid://localhost:5672/sms.sender",
         help="address for message queue (default %default)")
     parser.add_option(
         "-t", "--timeout", dest="timeout", type="float", default=0,

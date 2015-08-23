@@ -31,8 +31,11 @@ def before_first_request():
 def before_request():
     # https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-apache-qpid
     try:
-        g.logger.debug("Starting MQ connection")
-        g.mq_sender = SubmitSMS(g.conf.mq_addr)
+        # g.logger.debug("Starting MQ connection")
+        g.mq_sender = SubmitSMS(app.config["MQ_ADDR"])
+        g.mq_parser = reqparse.RequestParser()
+        g.mq_parser.add_argument('msg_num', help="Num de telefone")
+        g.mq_parser.add_argument('msg_texto', help="Texto da mensagem")
     except ConnectError:
         raise exceptions.MQError(2)
 
@@ -59,6 +62,18 @@ class Sms(Resource):
             'msg_texto': args['msg_texto']
         }
         g.mq_sender.submit(Message(msg))
+        return msg, 201
+
+    def post(self, msg_id):
+        mq_parser = g.get('mq_parser', None)
+        mq_sender = g.get('mq_sender', None)
+        args = mq_parser.parse_args()
+        msg = {
+            'msg_num': args['msg_num'],
+            'msg_texto': args['msg_texto']
+        }
+        # mq_sender.submit(Message(msg))
+        mq_sender.submit(args['msg_num'], args['msg_texto'])
         return msg, 201
 
 
