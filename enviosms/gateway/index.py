@@ -97,7 +97,7 @@ class Sms(Resource):
             'msg_num': args['msg_num'],
             'msg_texto': args['msg_texto']
         }
-        app.logger("POST - %(msg_id)s, %(msg_num)s, %(msg_texto)s" % msg)
+        app.logger.info("POST - %(msg_id)s, %(msg_num)s, %(msg_texto)s" % msg)
         # mq_sender.submit(Message(msg))
         mq_sender.submit(args['msg_num'], args['msg_texto'])
         return msg, 201
