@@ -1,18 +1,17 @@
 # -*- coding: UTF-8 -*-
 
+class InvalidUsage(Exception):
+    status_code = 400
 
-class MQError(Exception):
-    _errors = {
-        1: "Classe com a URI nao encontrada",
-        2: "Nao foi possivel realizar conexao na fila",
-    }
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
 
-    def __init__(self, msg=None, cod=0):
-        if not msg:
-            self.msg = self._errors[cod]
-        else:
-            self.msg = msg
-        self.cod = cod
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
 
-    def __str__(self):
-        return self.msg

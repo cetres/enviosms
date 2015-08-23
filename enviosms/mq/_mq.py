@@ -11,7 +11,8 @@ logger = Logging.getLogger()
 class MQError(Exception):
     _errors = {
         1: "Classe com a URI nao encontrada",
-        2: "Nao foi possivel realizar conexao na fila",
+        2: "Nao foi possivel realizar conexao no servidor de fila",
+        3: "Nao foi possivel realizar conexao na fila"
     }
 
     def __init__(self, msg=None, cod=0):

@@ -19,12 +19,15 @@ class Qpid(MQ):
             if not self._conn:
                 raise MQError(None, 2)
             self._conn.open()
+        except ConnectError:
+            raise MQError(cod=2)
+        try:
             self._session = self._conn.session()
             self._sender = self._session.sender(self._url.path[1:])
             self._receiver = self._session.receiver(self._url.path[1:])
-            logger.info("Connected on queue %s from %s" % (self._url.path[1:], self._url.netloc))
+            logger.info("Connected on queue %s on %s" % (self._url.path[1:], self._url.netloc))
         except ConnectError:
-            raise MQError(cod=2)
+            raise MQError(cod=3)
 
     def _enviar(self, mensagem):
         logger.debug("Sending a message")

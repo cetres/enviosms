@@ -4,7 +4,8 @@
 import optparse
 import re
 
-from enviosms.gateway import app, exceptions
+from enviosms.gateway import app
+from enviosms.mq import MQError
 
 
 def start(opts):
@@ -15,6 +16,7 @@ def start(opts):
     app.config["MQ_HOST"] = opts.mq_host
     app.config["MQ_ADDR"] = opts.mq_addr
     app.config["TIMEOUT"] = opts.timeout
+    app.config["LOG_PATH"] = opts.log_path
     app.run(host=bind_ip, port=int(bind_port), debug=opts.debug)
 
 if __name__ == '__main__':
@@ -37,6 +39,9 @@ if __name__ == '__main__':
         "-i", "--bind", dest="bind", default="0.0.0.0:80",
         help="Bind a specific IP address and port (default %default)")
     parser.add_option(
+        "-l", "--log_path", dest="log_path", default="/var/log/enviosms_gw",
+        help="log output path (default %default)")
+    parser.add_option(
         "-d", dest="debug", action="store_true",
         help="enable debugging")
     opts, args = parser.parse_args()
@@ -45,7 +50,7 @@ if __name__ == '__main__':
         if not re.match(r'[0-9]+(?:\.[0-9]+){3}:[0-9]+', opts.bind):
             parser.error("bind address is invalid (i.e. 127.0.0.1:80)")
         start(opts)
-    except exceptions.MQError as e:
+    except MQError as e:
         print(e)
     except KeyboardInterrupt:
         pass

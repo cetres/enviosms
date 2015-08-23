@@ -22,6 +22,7 @@ class ConfigError(Exception):
 class Config(object):
     _root_path = None
     _log_handler = None
+    _logger = None
 
     def __init__(self, app):
         self._root_path = app.root_path
@@ -80,12 +81,21 @@ class Config(object):
     def local_log_file(self):
         """Obtem o caminho para o arquivo local de log"""
         global LOCAL_LOG_PATH
-        log_path = self._config.get("local_log_path", LOCAL_LOG_PATH)
-        return os.path.join(self._root_path, log_path)
+        log_path = self._app.config.get("LOG_PATH", None)
+        if not log_path:
+            log_path = os.path.join(self._root_path, self._config.get("local_log_path", LOCAL_LOG_PATH))
+        return log_path
 
     @property
     def debug(self):
         return self._app.debug
+
+    def _logger_level(self):
+        if self.debug:
+            return logging.DEBUG
+        global LOCAL_LOG_LEVEL
+        return self._config.get("local_log_level", LOCAL_LOG_LEVEL)
+        
 
     def _logger_handler_file(self):
         global LOCAL_LOG_FORMAT, LOCAL_LOG_LEVEL
@@ -108,8 +118,8 @@ class Config(object):
         return self._log_handler
 
     def logger(self, modulo):
-        global LOCAL_LOG_LEVEL
-        logger = logging.getLogger(modulo)
-        logger.addHandler(self._logger_handler_file())
-        logger.setLevel(self._config.get("local_log_level", LOCAL_LOG_LEVEL))
-        return logger
+        if not self._logger:
+            self._app.logger.addHandler(self._logger_handler_file())
+            self._app.logger.setLevel(self._logger_level())
+            self._logger = self._app.logger
+        return self._logger
