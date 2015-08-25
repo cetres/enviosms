@@ -106,7 +106,7 @@ class Modem:
         logger.info(">" + str(dados))
         self._serial.write(dados)
 
-    def send_command(self, command, getline=True, newline=True, append=None, expect=None):
+    def send_command(self, command, getline=True, newline=True, append=None, expect=None, timeout=2):
             self.flush()
             try:
                 self.write(str(command))
@@ -123,7 +123,7 @@ class Modem:
                         time.sleep(1)
                         data = self.read().strip()
                     if len(data) == 0:
-                        time.sleep(2)
+                        time.sleep(timeout)
                         data = self.read().strip()
                     if not data.startswith(expect):
                         raise ModemError("Return not expected (%s) of (%s)" % (data, expect))
@@ -191,7 +191,7 @@ class Modem:
                 destino_so = self._encodeSemiOctets(rcpt)
                 pdu = tpdu1 + destino_so + tpdu2 + msg_part
                 self.send_command('AT+CMGS=%d' % ((len(pdu)-2)/2), expect=">")
-                self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS")
+                self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS", timeout=20)
         else:
             self.set_text_mode()
             destino = self._hexlify(message.recipient)
