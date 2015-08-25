@@ -119,12 +119,12 @@ class Modem:
             if getline or expect:
                 data = self.read().strip()
                 if expect:
-                    if len(data) == 0:
-                        time.sleep(1)
-                        data = self.read().strip()
-                    if len(data) == 0:
-                        time.sleep(timeout)
-                        data = self.read().strip()
+                    for _ in range(0, timeout):
+                        if len(data) == 0:
+                            time.sleep(1)
+                            data = self.read().strip()
+                        else:
+                            break
                     if not data.startswith(expect):
                         raise ModemError("Return not expected (%s) of (%s)" % (data, expect))
                 if getline:
@@ -191,7 +191,7 @@ class Modem:
                 destino_so = self._encodeSemiOctets(rcpt)
                 pdu = tpdu1 + destino_so + tpdu2 + msg_part
                 self.send_command('AT+CMGS=%d' % ((len(pdu)-2)/2), expect=">")
-                self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS", timeout=20)
+                self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS", timeout=30)
         else:
             self.set_text_mode()
             destino = self._hexlify(message.recipient)
