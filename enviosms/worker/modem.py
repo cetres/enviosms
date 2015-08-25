@@ -106,7 +106,7 @@ class Modem:
         logger.info(">" + str(dados))
         self._serial.write(dados)
 
-    def send_command(self, command, getline=True, newline=True, append=None, expect=None, timeout=2):
+    def send_command(self, command, getline=True, newline=True, append=None, expect=None, timeout=3):
             self.flush()
             try:
                 self.write(str(command))
@@ -126,7 +126,7 @@ class Modem:
                         else:
                             break
                     if not data.startswith(expect):
-                        raise ModemError("Return not expected (%s) of (%s)" % (data, expect))
+                        raise ModemError("Return not expected (%s) of (%s)" % (data, expect), msg_modem=data)
                 if getline:
                     return data
 
@@ -149,7 +149,7 @@ class Modem:
     def send_message(self, message, force_pdu=False, force_udh=False, tp_vpf=None):
         t0 = time.time()
         self.init_message()
-        logger.info("Destino: %s" % message.recipient)
+        logger.info("Recipient: %s" % message.recipient)
         msg_len = len(message.content)
         if msg_len > 160 or force_pdu:
             self.set_pdu_mode()
@@ -191,7 +191,14 @@ class Modem:
                 destino_so = self._encodeSemiOctets(rcpt)
                 pdu = tpdu1 + destino_so + tpdu2 + msg_part
                 self.send_command('AT+CMGS=%d' % ((len(pdu)-2)/2), expect=">")
-                self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS", timeout=30)
+                try:
+                    self.send_command(pdu, newline=False,  append=chr(26), expect="+CMGS", timeout=30)
+                except ModemError as e:
+                    if e.msg_modem == "+CMS ERROR: 500":
+                        logger.warn("Message not sent: %s" % e.msg_modem)
+                        return False
+                    else:
+                        raise
         else:
             self.set_text_mode()
             destino = self._hexlify(message.recipient)
@@ -202,6 +209,7 @@ class Modem:
             self.read()
         self._msg_send_time = time.time() - t0
         logger.info("Time: %.1f sec" % self._msg_send_time)
+        return True
 
     def read_messages(self):
         self.connect()
