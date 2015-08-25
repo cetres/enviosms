@@ -149,6 +149,7 @@ class Modem:
     def send_message(self, message, force_pdu=False, force_udh=False, tp_vpf=None):
         t0 = time.time()
         self.init_message()
+        logger.info("Destino: %s" % message.recipient)
         msg_len = len(message.content)
         if msg_len > 160 or force_pdu:
             self.set_pdu_mode()
