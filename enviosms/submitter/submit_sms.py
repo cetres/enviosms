@@ -16,3 +16,6 @@ class SubmitSMS(object):
     def submit(self, recipient, message):
         msg = MessageSMS(recipient, message)
         self._mq.enviar(msg.to_json())
+
+    def terminar():
+        self._mq.terminar()

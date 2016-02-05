@@ -92,6 +92,13 @@ class MQ(object):
         self.conectar()
         return self._tamanho()
 
+    def terminhar(self):
+        return self._terminar()
+
+    @abc.abstractmethod
+    def _terminar(self):
+        """Metodo para terminar fila MQ """
+
     @abc.abstractmethod
     def _tamanho(self):
         """Metodo para obter o tamanho do MQ """
