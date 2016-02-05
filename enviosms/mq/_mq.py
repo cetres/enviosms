@@ -92,7 +92,7 @@ class MQ(object):
         self.conectar()
         return self._tamanho()
 
-    def terminhar(self):
+    def terminar(self):
         return self._terminar()
 
     @abc.abstractmethod

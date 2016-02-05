@@ -150,6 +150,9 @@ class Modem:
         t0 = time.time()
         self.init_message()
         logger.info("Recipient: %s" % message.recipient)
+        if not message.content:
+            logger.error("Mensagem sem conteudo")
+            return True
         msg_len = len(message.content)
         if msg_len > 160 or force_pdu:
             self.set_pdu_mode()
