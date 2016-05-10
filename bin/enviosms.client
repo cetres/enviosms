@@ -1,0 +1,68 @@
+#!/usr/bin/python2.7
+# -*- coding: UTF-8 -*-
+"""
+Config file format (/etc/enviosms.conf):
+
+  [Client]
+  url: http://url.to.server/path
+
+
+
+"""
+
+
+import os
+import urllib
+import urllib2
+import json
+import optparse
+import ConfigParser
+
+CONFIG_FILE = "/etc/enviosms.conf"
+
+def enviar(opts, message):
+    debug = opts.debug
+    data = urllib.urlencode({
+        "msg_num": opts.num,
+        "msg_texto": message
+    })
+    if debug:
+        print "URL: %s" % opts.url
+        print "Num: %s" % opts.num
+        print "Dados: %s" % data
+    req = urllib2.Request(opts.url, data)
+    resposta = urllib2.urlopen(req)
+    if debug:
+        print resposta.read()
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(
+        usage="usage: %prog [options]", description="Script to send SMS messages")
+    parser.add_option(
+        "-n", "--number", dest="num", default="",
+        help="Telephone number to send the message")
+    parser.add_option(
+        "-u", "--url", dest="url", default="",
+        help="URL for SMS message server. Read from %s" % CONFIG_FILE)
+    parser.add_option(
+        "-d", dest="debug", action="store_true",
+        help="enable debugging")
+    opts, args = parser.parse_args()
+    config = ConfigParser.ConfigParser()
+    config.read(CONFIG_FILE)
+    if not opts.num:
+        parser.error("Telephone number is required")
+    if not opts.url:
+        if not os.path.exists(CONFIG_FILE):
+            parser.error("No URL provided")
+        if not config.get('Client', 'url'):
+            parser.error("No URL provided")
+        opts.url = config.get('Client', 'url')
+    if len(args) == 0:
+        parser.error("Message is needed")
+    try:
+        enviar(opts, args[0].strip())
+    except urllib2.HTTPError as e:
+        print(e)
+    except KeyboardInterrupt:
+        pass
